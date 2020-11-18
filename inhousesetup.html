@@ -112,14 +112,10 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-6 text-center">
+                    <div class="col-md-12 text-center">
                         {% if emblem %}
                         <img src="{{ url_for('static', filename=emblem) }}" class="emblem">
                         {% endif %}
-                    </div>
-                    <div class="col-md-6 text-center">
-                        <button class="btn btn-outline-dark bg-light inhouse-button-margins"><h5 class="text-dark">Make
-                            Captain</h5></button>
                     </div>
                 </div>
             </div>
@@ -222,10 +218,10 @@
             <!--Start of Red Team Recommend Player Button-->
             <div class="row">
                 <div class="col-12 text-center">
-                        {% if red_team_1 %}
+                        {% if lobby_1 %}
                     <form method="get" action="/recommend_player/RED/lobby_1">
                         {% endif %}
-                        {% if red_team_2 %}
+                        {% if lobby_2 %}
                     <form method="get" action="/recommend_player/RED/lobby_2">
                         {% endif %}
                         <button type="submit" class="btn btn-outline-danger bg-light inhouse-button-margins"><h5
@@ -439,10 +435,10 @@
             <!-- Start of Blue Team Recommend Player button -->
             <div class="row">
                 <div class="col-12 text-center">
-                        {% if red_team_1 %}
+                        {% if lobby_1 %}
                     <form method="get" action="/recommend_player/BLUE/lobby_1">
                         {% endif %}
-                        {% if red_team_2 %}
+                        {% if lobby_2 %}
                     <form method="get" action="/recommend_player/BLUE/lobby_2">
                         {% endif %}
                         <button type="submit" class="btn btn-outline-primary bg-light inhouse-button-margins"><h5
