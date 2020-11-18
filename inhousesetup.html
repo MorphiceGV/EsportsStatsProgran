@@ -39,13 +39,13 @@
         <div class="col-md-6 text-center">
             <form method="get" action="/inhousesetup/lobby_1">
                 <button type="submit" class="btn btn-white"><i class="fas fa-sign-in-alt"></i>
-                    {% if lobby_1 %}<strong>{% endif %}Inhouse Lobby 1{% if lobby_1 %}</strong>{% endif %}</button>
+                    {% if on_lobby_1 %}<strong>{% endif %}Inhouse Lobby 1{% if on_lobby_1 %}</strong>{% endif %}</button>
             </form>
         </div>
         <div class="col-md-6 text-center">
             <form method="get" action="/inhousesetup/lobby_2">
                 <button type="submit" class="btn btn-white"><i class="fas fa-sign-in-alt"></i>
-                    {% if lobby_2 %}<strong>{% endif %}Inhouse Lobby 2{% if lobby_2 %}</strong>{% endif %}</button>
+                    {% if on_lobby_2 %}<strong>{% endif %}Inhouse Lobby 2{% if on_lobby_2 %}</strong>{% endif %}</button>
             </form>
         </div>
     </div>
@@ -129,10 +129,10 @@
     <!--Start of refresh button-->
     <div class="row">
         <div class="col-12 text-center">
-                {% if lobby_1 %}
+                {% if on_lobby_1 %}
             <form method="get" action="/inhousesetup/lobby_1">
                 {% endif %}
-                {% if lobby_2 %}
+                {% if on_lobby_2 %}
             <form method="get" action="/inhousesetup/lobby_2">
                 {% endif %}
                 <button type="submit" class="btn btn-outline-dark bg-light inhouse-button-margins"><h5
@@ -255,10 +255,10 @@
             <!--Start of Lobby Header-->
             <div class="row">
                 <div class="col-12 bg-dark text-center">
-                    {% if lobby_1 or red_team_1 or blue_team_1 %}
+                    {% if on_lobby_1 %}
                     <h1 class="text-light">Inhouse Lobby 1</h1>
                     {% endif %}
-                    {% if lobby_2 or red_team_2 or blue_team_2 %}
+                    {% if on_lobby_2 %}
                     <h1 class="text-light">Inhouse Lobby 2</h1>
                     {% endif %}
                 </div>
