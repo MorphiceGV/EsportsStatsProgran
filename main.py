@@ -1,18 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_mysqldb import MySQL
 from flask_mail import Mail, Message
-import MySQLdb.cursors, re, uuid, ast
+import MySQLdb.cursors, re, uuid, ast, string, random
 from player_calculations import *
 
 app = Flask(__name__, static_folder="static")
 app.secret_key = "secret key"
 
-"""
-app.config['MYSQL_HOST'] = '100.25.161.11'
-app.config['MYSQL_USER'] = 'Administrator'
-app.config['MYSQL_PASSWORD'] = 'DkZ$d)ZMvoii8vsy!f)Irpevb&%$$hT2'
-app.config['MYSQL_DB'] = ''
-"""
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
@@ -30,13 +24,14 @@ mysql = MySQL(app)
 
 account = ""
 
-queue = []
 
-# lobby_1 = [createPlayer("Christi"), createPlayer("OrdinaryGuyRyu"), createPlayer("Morphice"),
-#            createPlayer("boxxybabee"),
-#            createPlayer("Dog WITH A Blog"), createPlayer("LT Pancakes"), createPlayer("CocoCookieDough"),
-#            createPlayer("Gamer183"), createPlayer("MorningBacon"), createPlayer("Kaybun")]
+queue = [createPlayer("Christi"), createPlayer("OrdinaryGuyRyu"), createPlayer("Morphice"),
+            createPlayer("boxxybabee"),
+            createPlayer("Dog WITH A Blog"), createPlayer("LT Pancakes"), createPlayer("CocoCookieDough"),
+            createPlayer("Gamer183"), createPlayer("MorningBacon")]
+
 lobby_1 = []
+
 red_team_1 = []
 blue_team_1 = []
 
@@ -64,6 +59,7 @@ def login():
 @app.route('/to_home')
 def back_to_login():
     session.pop('summoner', None)
+    session.pop('summonername', None)
     return redirect(url_for('login'))
 
 
@@ -148,7 +144,7 @@ def usernameforgot():
         account = cursor.fetchone()
         if account:
             # database update routine
-            token = str(uuid.uuid4())
+            token = str(''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(6)))
             cursor.execute('UPDATE admins SET token = %s WHERE email = %s', (token, email))
             mysql.connection.commit()
             cursor.close()
@@ -171,12 +167,13 @@ def usernameforgot():
 
 
 # Reset username page, link accessed via email sent from usernameforgot() **NOT WORKING, cant access URL**
-@app.route('/usernamereset/<token>', methods=['GET', 'POST'])
-def usernamereset(token):
+@app.route('/usernamereset', methods=['GET', 'POST'])
+def usernamereset():
     if 'loggedin' in session:
         return redirect(url_for('lobbysetup'))
-    elif request.method == 'POST' and 'username' in request.form:
+    elif request.method == 'POST' and 'username' in request.form and 'token' in request.form:
         username = request.form['username']
+        token = request.form['token']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM admins WHERE username = %s', (username,))
         account = cursor.fetchone()
@@ -198,7 +195,7 @@ def usernamereset(token):
                 cursor.close()
                 flash('Username successfully updated, please log in with new credentials.')
             else:
-                return redirect(url_for('login'))
+                flash('Invalid Security Code.')
     elif request.method == 'POST':
         flash('Please fill out your username.')
     return render_template('usernamereset.html')
@@ -216,7 +213,7 @@ def passwordforgot():
         account = cursor.fetchone()
         if account:
             # database routine
-            token = str(uuid.uuid4())
+            token = str(''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(6)))
             cursor.execute('UPDATE admins SET token2 = %s WHERE email = %s', (token, email))
             mysql.connection.commit()
             cursor.close()
@@ -237,13 +234,14 @@ def passwordforgot():
 
 
 # Reset password page, link accessed via email sent from passwordforgot() **NOT WORKING, cant access URL**
-@app.route('/passwordreset/<token>', methods=['POST', 'GET'])
-def passwordreset(token):
+@app.route('/passwordreset', methods=['POST', 'GET'])
+def passwordreset():
     if 'loggedin' in session:
         return redirect(url_for('lobbysetup'))
-    elif request.method == 'POST' and 'password' in request.form and 'cpassword' in request.form:
+    elif request.method == 'POST' and 'password' in request.form and 'cpassword' in request.form and 'token' in request.form:
         password = request.form['password']
         cpassword = request.form['cpassword']
+        token = request.form['token']
         if not password:
             flash('Please fill out the entire form.')
         elif not password == cpassword:
@@ -263,7 +261,7 @@ def passwordreset(token):
                 cursor.close()
                 flash('Password successfully updated, please log in with new credentials.')
             else:
-                return redirect(url_for('login'))
+                flash('Invalid Security Code.')
     elif request.method == 'POST':
         flash('Please fill out the entire form.')
     return render_template('passwordreset.html')
