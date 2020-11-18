@@ -241,87 +241,92 @@ def comparePlayers(a, b):
 
 
 def RecommendPlayer(a, b, c, team):
-    #onvertTeam()
-    a = teamOverAll(a)
-    b = teamOverAll(b)
-    if a == b:
-        return "The teams are already balanced."
-    if a > b:
-        reference = -9999
-        referencei = 0
-        for i in range(len(c)):
-            if tierNumber(playerRank(c[i])) + a <= b:
-                if tierNumber(playerRank(c[i])) + a >= reference:
-                    reference = tierNumber(playerRank(c[i])) + a
-                    referencei = i
-                if tierNumber(playerRank(c[i])) + a == b:
-                    referencei = i
-                    return getName(c[i]) + " " + playerRank(c[i]) + " is recommended for " + team + " team."
-        if tierNumber(playerRank(c[referencei])) + a > b:
-            pass
-        else:
+    if len(a) < 5:
+        a = teamOverAll(a)
+        b = teamOverAll(b)
+        if len(c) >= 1:
+            if a == b:
+                return getName(c[0]) + " " + playerRank(c[0]) + " is recommended for " + team + " team."
+            if a > b:
+                reference = -9999
+                referencei = 0
+                for i in range(len(c)):
+                    if tierNumber(playerRank(c[i])) + a <= b:
+                        if tierNumber(playerRank(c[i])) + a >= reference:
+                            reference = tierNumber(playerRank(c[i])) + a
+                            referencei = i
+                        if tierNumber(playerRank(c[i])) + a == b:
+                            referencei = i
+                            return getName(c[i]) + " " + playerRank(c[i]) + " is recommended for " + team + " team."
+                if tierNumber(playerRank(c[referencei])) + a > b:
+                    pass
+                else:
+                    return getName(c[referencei])+" "+playerRank(c[referencei])+" is recommended for " + team + " team."
+            if a < b:
+                reference = 9999
+                referencei = 0
+                for i in range(len(c)):
+                    if tierNumber(playerRank(c[i])) + a >= b:
+                        if tierNumber(playerRank(c[i])) + a <= reference:
+                            reference = tierNumber(playerRank(c[i])) + a
+                            referencei = i
+                        if tierNumber(playerRank(c[i])) + a == b:
+                            referencei = i
+                            return getName(c[i])+" "+playerRank(c[i])+" is recommended for " + team + " team."
+                if tierNumber(playerRank(c[referencei])) + a < b:
+                    pass
+                else:
+                    return getName(c[referencei])+" "+playerRank(c[referencei])+" is recommended for " + team + " team."
+
+            reference1 = a
+            reference2 = b
+
+            referenceLower = -9999
+            referenceUpper = 9999
+            referencei1 = 0
+            referencei2 = 0
+            average = (a + b) / 2
+            if a > b:
+                averageArange = (reference2 + average) / 2
+                averageBrange = (reference1 + average) / 2
+            if b > a:
+                averageArange = (reference1 + average) / 2
+                averageBrange = (reference2 + average) / 2
+            for i in range(len(c)):
+                if reference1 + tierNumber(playerRank(c[i])) >= averageArange and tierNumber(playerRank(c[i])) + reference1 <= averageBrange:
+                    if averageArange <= tierNumber(playerRank(c[i])) + reference1 <= average and tierNumber(playerRank(c[
+                        i])) + reference1 > referenceLower:
+                        referenceLower = tierNumber(playerRank(c[i])) + reference1
+                        referencei1 = i
+
+                    if averageBrange >= tierNumber(playerRank(c[i])) + reference1 >= average and tierNumber(playerRank(c[
+                        i])) + reference1 < referenceUpper:
+                        referenceUpper = tierNumber(playerRank(c[i])) + reference1
+                        referencei2 = i
+
+                    if tierNumber(playerRank(c[i])) + reference1 == average:
+                        return getName(c[i])+" "+playerRank(c[i])+" is recommended for " + team + " team."
+
+            if referenceLower == -9999:
+                referenceLower = 0
+            if referenceUpper == 9999:
+                referenceUpper = average * 2
+
+            referenceLower = average - referenceLower
+            referenceUpper = referenceUpper - average
+            referencei = referencei1
+            if referenceLower < referenceUpper:
+                referencei = referencei1
+            if referenceLower > referenceUpper:
+                referencei = referencei2
+            if referenceLower == average and referenceUpper == average:
+                return getName(c[0])+" "+playerRank(c[0])+" is recommended for " + team + " team."
+
             return getName(c[referencei])+" "+playerRank(c[referencei])+" is recommended for " + team + " team."
-    if a < b:
-        reference = 9999
-        referencei = 0
-        for i in range(len(c)):
-            if tierNumber(playerRank(c[i])) + a >= b:
-                if tierNumber(playerRank(c[i])) + a <= reference:
-                    reference = tierNumber(playerRank(c[i])) + a
-                    referencei = i
-                if tierNumber(playerRank(c[i])) + a == b:
-                    referencei = i
-                    return getName(c[i])+" "+playerRank(c[i])+" is recommended for " + team + " team."
-        if tierNumber(playerRank(c[referencei])) + a < b:
-            pass
         else:
-            return getName(c[referencei])+" "+playerRank(c[referencei])+" is recommended for " + team + " team."
-
-    reference1 = a
-    reference2 = b
-
-    referenceLower = -9999
-    referenceUpper = 9999
-    referencei1 = 0
-    referencei2 = 0
-    average = (a + b) / 2
-    if a > b:
-        averageArange = (reference2 + average) / 2
-        averageBrange = (reference1 + average) / 2
-    if b > a:
-        averageArange = (reference1 + average) / 2
-        averageBrange = (reference2 + average) / 2
-    for i in range(len(c)):
-        if reference1 + tierNumber(playerRank(c[i])) >= averageArange and tierNumber(playerRank(c[i])) + reference1 <= averageBrange:
-            if averageArange <= tierNumber(playerRank(c[i])) + reference1 <= average and tierNumber(playerRank(c[
-                i])) + reference1 > referenceLower:
-                referenceLower = c[i] + reference1
-                referencei1 = i
-
-            if averageBrange >= tierNumber(playerRank(c[i])) + reference1 >= average and tierNumber(playerRank(c[
-                i])) + reference1 < referenceUpper:
-                referenceUpper = tierNumber(playerRank(c[i])) + reference1
-                referencei2 = i
-
-            if tierNumber(playerRank(c[i])) + reference1 == average:
-                return getName(c[i])+" "+playerRank(c[i])+" is recommended for " + team + " team."
-
-    if referenceLower == -9999:
-        referenceLower = 0
-    if referenceUpper == 9999:
-        referenceUpper = average * 2
-
-    referenceLower = average - referenceLower
-    referenceUpper = referenceUpper - average
-    referencei = referencei1
-    if referenceLower < referenceUpper:
-        referencei = referencei1
-    if referenceLower > referenceUpper:
-        referencei = referencei2
-    if referenceLower == average and referenceUpper == average:
-        return "There is no recommendation to be made."
-
-    return getName(c[referencei])+" "+playerRank(c[referencei])+" is recommended for " + team + " team."
+            return "There are no players in the queue currently."
+    else:
+        return "Team is already full."
 
 def PlaceRecommend(a, b, c, team):
     a = teamOverAll(a)
