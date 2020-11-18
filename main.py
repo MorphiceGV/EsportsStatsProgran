@@ -32,9 +32,11 @@ account = ""
 
 queue = []
 
-lobby_1 = [createPlayer("Christi"), createPlayer("OrdinaryGuyRyu"), createPlayer("Morphice"), createPlayer("boxxybabee"),
-           createPlayer("Dog WITH A Blog"), createPlayer("LT Pancakes"), createPlayer("CocoCookieDough"),
-           createPlayer("Gamer183"), createPlayer("MorningBacon"), createPlayer("Kaybun")]
+# lobby_1 = [createPlayer("Christi"), createPlayer("OrdinaryGuyRyu"), createPlayer("Morphice"),
+#            createPlayer("boxxybabee"),
+#            createPlayer("Dog WITH A Blog"), createPlayer("LT Pancakes"), createPlayer("CocoCookieDough"),
+#            createPlayer("Gamer183"), createPlayer("MorningBacon"), createPlayer("Kaybun")]
+lobby_1 = []
 red_team_1 = []
 blue_team_1 = []
 
@@ -277,7 +279,6 @@ def home():
 @app.route('/join_queue/<player>', methods=['GET', 'POST'])
 def join_queue(player):
     global queue
-    global stats
     if 'summonername' in session:
         if session['summoner'] in queue:
             flash('Player already in Queue')
@@ -304,11 +305,14 @@ def get_inhouse_lobby(lobby):
     global red_team_2
     global blue_team_1
     global blue_team_2
-    global stats
 
     if lobby == 'lobby_2':
-        return render_template('userlobby.html', lobby_2=lobby_2, red_team_2=red_team_2, blue_team_2=blue_team_2)
-    return render_template('userlobby.html', lobby_1=lobby_1, red_team_1=red_team_1, blue_team_1=blue_team_1)
+        on_lobby_2 = True
+        return render_template('userlobby.html', lobby_2=lobby_2, red_team_2=red_team_2, blue_team_2=blue_team_2,
+                               on_lobby_2=on_lobby_2)
+    on_lobby_1 = True
+    return render_template('userlobby.html', lobby_1=lobby_1, red_team_1=red_team_1, blue_team_1=blue_team_1,
+                           on_lobby_1=on_lobby_1)
 
 
 # For editing the players from the queue to either one of the lobbies, accessed by admins
@@ -318,7 +322,7 @@ def lobbysetup():
     global queue
     global lobby_1
     global lobby_2
-    global stats
+
     if 'loggedin' in session:
         if not account:
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -416,14 +420,11 @@ def inhousesetup(lobby):
     global blue_team_2
 
     if 'loggedin' in session:
-        if lobby == 'lobby_1':
-            return render_template('inhousesetup.html', account=account, queue=queue, lobby_1=lobby_1,
-                                   red_team_1=red_team_1, blue_team_1=blue_team_1)
-        elif lobby == 'lobby_2':
+        if lobby == 'lobby_2':
             return render_template('inhousesetup.html', account=account, queue=queue, lobby_2=lobby_2,
-                                   red_team_2=red_team_2, blue_team_2=blue_team_2)
+                                   red_team_2=red_team_2, blue_team_2=blue_team_2, on_lobby_2=True)
         return render_template('inhousesetup.html', account=account, queue=queue, lobby_1=lobby_1,
-                               red_team_1=red_team_1, blue_team_1=blue_team_1)
+                               red_team_1=red_team_1, blue_team_1=blue_team_1, on_lobby_1=True)
     return redirect(url_for('login'))
 
 
@@ -438,7 +439,6 @@ def stat_lookup(player, lobby):
     global blue_team_1
     global red_team_2
     global blue_team_2
-    global stats
 
     p = ast.literal_eval(player)
 
@@ -447,10 +447,10 @@ def stat_lookup(player, lobby):
         emblem = get_emblem_image(p['tier'])
         if lobby == 'lobbysetup1':
             return render_template('userlobby.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
-                                   blue_team_1=blue_team_1, player_stats=PlayerInfo(p), emblem=emblem)
+                                   blue_team_1=blue_team_1, player_stats=PlayerInfo(p), emblem=emblem, on_lobby_1=True)
         else:
             return render_template('userlobby.html', account=account, lobby_2=lobby_2, red_team_2=red_team_2,
-                                   blue_team_2=blue_team_2, player_stats=PlayerInfo(p), emblem=emblem)
+                                   blue_team_2=blue_team_2, player_stats=PlayerInfo(p), emblem=emblem, on_lobby_2=True)
 
     # When admins request summoner stats
     elif lobby == 'lobby_1' or lobby == 'lobby_2':
@@ -458,10 +458,12 @@ def stat_lookup(player, lobby):
             emblem = get_emblem_image(p['tier'])
             if lobby == 'lobby_1':
                 return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
-                                       blue_team_1=blue_team_1, player_stats=PlayerInfo(p), emblem=emblem)
+                                       blue_team_1=blue_team_1, player_stats=PlayerInfo(p), emblem=emblem,
+                                       on_lobby_1=True)
             else:
                 return render_template('inhousesetup.html', account=account, lobby_2=lobby_2, red_team_2=red_team_2,
-                                       blue_team_2=blue_team_2, player_stats=PlayerInfo(p), emblem=emblem)
+                                       blue_team_2=blue_team_2, player_stats=PlayerInfo(p), emblem=emblem,
+                                       on_lobby_2=True)
         return redirect(url_for('login'))
     return redirect(url_for('login'))
 
@@ -490,9 +492,9 @@ def move_to_team(player, team, lobby):
             else:
                 msg = "Team is currently full (Max 5)"
                 return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
-                                       blue_team_1=blue_team_1, msg=msg)
+                                       blue_team_1=blue_team_1, msg=msg, on_lobby_1=True)
             return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
-                                   blue_team_1=blue_team_1)
+                                   blue_team_1=blue_team_1, on_lobby_1=True)
         elif lobby == 'lobby_2':
             if team == 'RED' and pl in lobby_2 and len(red_team_2) < 5:
                 lobby_2.remove(pl)
@@ -503,13 +505,12 @@ def move_to_team(player, team, lobby):
             else:
                 msg = "Team is currently full (Max 5)"
                 return render_template('inhousesetup.html', account=account, lobby_2=lobby_2, red_team_2=red_team_2,
-                                       blue_team_2=blue_team_2, msg=msg)
+                                       blue_team_2=blue_team_2, msg=msg, on_lobby_2=True)
             return render_template('inhousesetup.html', account=account, lobby_2=lobby_2, red_team_2=red_team_2,
-                                   blue_team_2=blue_team_2)
+                                   blue_team_2=blue_team_2, on_lobby_2=True)
         return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
-                               blue_team_1=blue_team_1)
+                               blue_team_1=blue_team_1, on_lobby_1=True)
     return redirect(url_for('login'))
-
 
 
 # Moving player from team to lobby, accessed by admins
@@ -534,7 +535,7 @@ def remove_from_team(player, team, lobby):
                 blue_team_1.remove(pl)
                 lobby_1.append(pl)
             return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
-                                   blue_team_1=blue_team_1)
+                                   blue_team_1=blue_team_1, on_lobby_1=True)
         elif lobby == 'lobby_2':
             if team == 'RED' and pl in red_team_2:
                 red_team_2.remove(pl)
@@ -543,10 +544,11 @@ def remove_from_team(player, team, lobby):
                 blue_team_2.remove(pl)
                 lobby_2.append(pl)
             return render_template('inhousesetup.html', account=account, lobby_2=lobby_2, red_team_2=red_team_2,
-                                   blue_team_2=blue_team_2)
+                                   blue_team_2=blue_team_2, on_lobby_2=True)
         return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
-                               blue_team_1=blue_team_1)
+                               blue_team_1=blue_team_1, on_lobby_1=True)
     return redirect(url_for('login'))
+
 
 # Recommending a player for either red or blue team, accessed by admins
 @app.route('/recommend_player/<team>/<lobby>', methods=['GET', 'POST'])
@@ -564,27 +566,28 @@ def recommend_player(team, lobby):
             if team == 'RED':
                 recomm_red = RecommendPlayer(red_team_1, blue_team_1, lobby_1, 'RED')
                 return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
-                                       blue_team_1=blue_team_1, recomm_red=recomm_red)
+                                       blue_team_1=blue_team_1, recomm_red=recomm_red, on_lobby_1=True)
             elif team == 'BLUE':
                 recomm_blue = RecommendPlayer(blue_team_1, red_team_1, lobby_1, 'BLUE')
                 return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
-                                       blue_team_1=blue_team_1, recomm_blue=recomm_blue)
+                                       blue_team_1=blue_team_1, recomm_blue=recomm_blue, on_lobby_1=True)
             return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
-                                   blue_team_1=blue_team_1)
+                                   blue_team_1=blue_team_1, on_lobby_1=True)
         elif lobby == 'lobby_2':
             if team == 'RED':
                 recomm_red = RecommendPlayer(red_team_2, blue_team_2, lobby_2, 'RED')
                 return render_template('inhousesetup.html', account=account, lobby_2=lobby_2, red_team_2=red_team_2,
-                                       blue_team_2=blue_team_2, recomm_red=recomm_red)
+                                       blue_team_2=blue_team_2, recomm_red=recomm_red, on_lobby_2=True)
             elif team == 'BLUE':
                 recomm_blue = RecommendPlayer(blue_team_2, red_team_2, lobby_2, 'BLUE')
                 return render_template('inhousesetup.html', account=account, lobby_2=lobby_2, red_team_2=red_team_2,
-                                       blue_team_2=blue_team_2, recomm_blue=recomm_blue)
+                                       blue_team_2=blue_team_2, recomm_blue=recomm_blue, on_lobby_2=True)
             return render_template('inhousesetup.html', account=account, lobby_2=lobby_2, red_team_2=red_team_2,
-                                   blue_team_2=blue_team_2)
+                                   blue_team_2=blue_team_2, on_lobby_2=True)
         return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
-                               blue_team_1=blue_team_1)
+                               blue_team_1=blue_team_1, on_lobby_1=True)
     return redirect(url_for('login'))
+
 
 # Auto balancing teams function (Full Team Balance)
 @app.route('/auto_balance/<lobby>', methods=['GET', 'POST'])
@@ -597,51 +600,51 @@ def FullTB(lobby):
     global red_team_2
     global blue_team_2
     if lobby == 'lobby_1':
-        if len(red_team_1)+len(blue_team_1)+len(lobby_1) >= 10:
-            while len(red_team_1)!= 5 or len(blue_team_1)!=5:
-                if len(red_team_1)>len(blue_team_1):
-                    a = PlaceRecommend(blue_team_1,red_team_1,lobby_1)
+        if len(red_team_1) + len(blue_team_1) + len(lobby_1) >= 10:
+            while len(red_team_1) != 5 or len(blue_team_1) != 5:
+                if len(red_team_1) > len(blue_team_1):
+                    a = PlaceRecommend(blue_team_1, red_team_1, lobby_1)
                     lobby_1.remove(a)
                     blue_team_1.append(a)
-                if len(red_team_1)<len(blue_team_1):
-                    a = PlaceRecommend(red_team_1,blue_team_1,lobby_1)
+                if len(red_team_1) < len(blue_team_1):
+                    a = PlaceRecommend(red_team_1, blue_team_1, lobby_1)
                     lobby_1.remove(a)
                     red_team_1.append(a)
-                if len(red_team_1)==len(blue_team_1) and len(red_team_1) < 5:
-                    a = PlaceRecommend(blue_team_1,red_team_1,lobby_1)
+                if len(red_team_1) == len(blue_team_1) and len(red_team_1) < 5:
+                    a = PlaceRecommend(blue_team_1, red_team_1, lobby_1)
                     lobby_1.remove(a)
                     blue_team_1.append(a)
             msg = "Teams successfully balanced!"
             return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
-                                   blue_team_1=blue_team_1, msg=msg)
+                                   blue_team_1=blue_team_1, msg=msg, on_lobby_1=True)
         else:
             msg = "Not Enough People Available to balance teams"
             return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
-                                   blue_team_1=blue_team_1, msg=msg)
+                                   blue_team_1=blue_team_1, msg=msg, on_lobby_1=True)
     elif lobby == 'lobby_2':
-        if len(red_team_2)+len(blue_team_2)+len(lobby_2) >= 10:
-            while len(red_team_2)!= 5 or len(blue_team_2)!=5:
-                if len(red_team_2)>len(blue_team_2):
-                    a = PlaceRecommend(blue_team_2,red_team_2,lobby_2)
+        if len(red_team_2) + len(blue_team_2) + len(lobby_2) >= 10:
+            while len(red_team_2) != 5 or len(blue_team_2) != 5:
+                if len(red_team_2) > len(blue_team_2):
+                    a = PlaceRecommend(blue_team_2, red_team_2, lobby_2)
                     lobby_2.remove(a)
                     blue_team_2.append(a)
-                if len(red_team_2)<len(blue_team_2):
-                    a = PlaceRecommend(red_team_2,blue_team_2,lobby_2)
+                if len(red_team_2) < len(blue_team_2):
+                    a = PlaceRecommend(red_team_2, blue_team_2, lobby_2)
                     lobby_2.remove(a)
                     red_team_2.append(a)
-                if len(red_team_2)==len(blue_team_2) and len(red_team_1) < 5:
-                    a = PlaceRecommend(blue_team_2,red_team_2,lobby_2)
+                if len(red_team_2) == len(blue_team_2) and len(red_team_1) < 5:
+                    a = PlaceRecommend(blue_team_2, red_team_2, lobby_2)
                     lobby_2.remove(a)
                     blue_team_2.append(a)
             msg = "Teams successfully balanced!"
             return render_template('inhousesetup.html', account=account, lobby_2=lobby_2, red_team_2=red_team_2,
-                                   blue_team_2=blue_team_2, msg=msg)
+                                   blue_team_2=blue_team_2, msg=msg, on_lobby_2=True)
         else:
             msg = "Not Enough People Available to balance teams"
             return render_template('inhousesetup.html', account=account, lobby_2=lobby_2, red_team_2=red_team_2,
-                                   blue_team_2=blue_team_2, msg=msg)
+                                   blue_team_2=blue_team_2, msg=msg, on_lobby_2=True)
     return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
-                           blue_team_1=blue_team_1)
+                           blue_team_1=blue_team_1, on_lobby_1=True)
 
 
 if __name__ == '__main__':
