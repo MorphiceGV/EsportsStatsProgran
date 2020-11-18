@@ -50,10 +50,13 @@ blue_team_2 = []
 def login():
     if request.method == 'POST' and 'summonername' in request.form:
         summonername = request.form['summonername']
-        session['summoner'] = createPlayer(summonername)
-        session['summonername'] = summonername
-        flash('Welcome, ' + summonername + '!')
-        return redirect(url_for('home'))
+        try:
+            session['summoner'] = createPlayer(summonername)
+            session['summonername'] = summonername
+            flash('Welcome, ' + summonername + '!')
+            return redirect(url_for('home'))
+        except KeyError:
+            flash('Invalid Summoner Name, are you registered?')
     return render_template('index.html')
 
 
