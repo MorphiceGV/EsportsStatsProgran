@@ -296,6 +296,10 @@ def join_queue(player):
             flash('Invalid Player. Please input valid Summoner name on login page.')
     return redirect(url_for('login'))
 
+# Meet the Creators Page
+@app.route('/meetthecreators', methods=['GET', 'POST'])
+def meet_the_creators():
+    return render_template('aboutthedevs.html')
 
 # For browsing either one of the two inhouse lobbies, accessed by regular users
 @app.route('/inhouse_lobby/<lobby>', methods=['GET', 'POST'])
