@@ -11,7 +11,7 @@ app.secret_key = "secret key"
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'root'
-app.config['MYSQL_DB'] = 'esportsproject'
+app.config['MYSQL_DB'] = 'leaguedatabase'
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
@@ -25,19 +25,16 @@ mysql = MySQL(app)
 account = ""
 
 
-queue = [createPlayer("Christi"), createPlayer("OrdinaryGuyRyu"), createPlayer("Morphice"),
-            createPlayer("boxxybabee"),
-            createPlayer("Dog WITH A Blog"), createPlayer("LT Pancakes"), createPlayer("CocoCookieDough"),
-            createPlayer("Gamer183"), createPlayer("MorningBacon")]
+queue = [createPlayer("Christi"), createPlayer("OrdinaryGuyRyu")]
 
-lobby_1 = []
+lobby_1 = [createPlayer("boxxybabee"), createPlayer("CocoCookieDough")]
 
-red_team_1 = []
-blue_team_1 = []
+red_team_1 = [createPlayer("Morphice")]
+blue_team_1 = [createPlayer("Dog WITH A Blog")]
 
-lobby_2 = []
-red_team_2 = []
-blue_team_2 = []
+lobby_2 = [createPlayer("LT Pancakes")]
+red_team_2 = [createPlayer("Gamer183")]
+blue_team_2 = [ createPlayer("MorningBacon")]
 
 
 # Login for Regular Users
@@ -70,7 +67,7 @@ def adminlogin():
         username = request.form['username']
         password = request.form['password']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM admins WHERE username = %s AND password = %s', (username, password,))
+        cursor.execute('SELECT * FROM admin_table WHERE username = %s AND password = %s', (username, password,))
         account = cursor.fetchone()
         if account:
             session['loggedin'] = True
@@ -140,12 +137,12 @@ def usernameforgot():
     elif request.method == 'POST' and 'email' in request.form:
         email = request.form['email']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM admins WHERE email = %s', (email,))
+        cursor.execute('SELECT * FROM admin_table WHERE email = %s', (email,))
         account = cursor.fetchone()
         if account:
             # database update routine
             token = str(''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(6)))
-            cursor.execute('UPDATE admins SET token = %s WHERE email = %s', (token, email))
+            cursor.execute('UPDATE admin_table SET token = %s WHERE email = %s', (token, email))
             mysql.connection.commit()
             cursor.close()
 
@@ -175,7 +172,7 @@ def usernamereset():
         username = request.form['username']
         token = request.form['token']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM admins WHERE username = %s', (username,))
+        cursor.execute('SELECT * FROM admin_table WHERE username = %s', (username,))
         account = cursor.fetchone()
         if account:
             flash('Username already exists, please try a different one.')
@@ -189,7 +186,7 @@ def usernamereset():
             token_exists = cursor.fetchone()
             if token_exists:
                 cursor.execute(
-                    'UPDATE admins SET token = %s, username = %s WHERE token = %s',
+                    'UPDATE admin_table SET token = %s, username = %s WHERE token = %s',
                     (token1, username, token))
                 mysql.connection.commit()
                 cursor.close()
@@ -209,12 +206,12 @@ def passwordforgot():
     elif request.method == 'POST' and 'email' in request.form:
         email = request.form['email']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM admins WHERE email = %s', (email,))
+        cursor.execute('SELECT * FROM admin_table WHERE email = %s', (email,))
         account = cursor.fetchone()
         if account:
             # database routine
             token = str(''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(6)))
-            cursor.execute('UPDATE admins SET token2 = %s WHERE email = %s', (token, email))
+            cursor.execute('UPDATE admin_table SET token2 = %s WHERE email = %s', (token, email))
             mysql.connection.commit()
             cursor.close()
             try:
@@ -255,7 +252,7 @@ def passwordreset():
             token_exists = cursor.fetchone()
             if token_exists:
                 cursor.execute(
-                    'UPDATE admins SET token2 = %s, password = %s WHERE token2 = %s',
+                    'UPDATE admin_table SET token2 = %s, password = %s WHERE token2 = %s',
                     (token1, password, token))
                 mysql.connection.commit()
                 cursor.close()
@@ -331,7 +328,7 @@ def lobbysetup():
     if 'loggedin' in session:
         if not account:
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('SELECT * FROM admins WHERE username = %s', (session['username'],))
+            cursor.execute('SELECT * FROM admin_table WHERE username = %s', (session['username'],))
             acc = cursor.fetchone()
             account = acc
         return render_template('lobbysetup.html', account=account, queue=queue, lobby_1=lobby_1, lobby_2=lobby_2)
