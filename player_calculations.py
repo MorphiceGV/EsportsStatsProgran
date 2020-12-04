@@ -473,6 +473,22 @@ def ClearTeam():
     while len(TeamB)!=0:
         Select(TeamB[0],TeamB)
         movetoTeam("P")
+        
+def sort_players(A):
+
+    for i in range(len(A)):
+        for j in range(len(A)):
+            p1 = A[i]
+            p2 = A[j]
+            lp1 = p1['leaguePoints']
+            lp2 = p2['leaguePoints']
+
+            if lp1 > lp2:
+                temp = A[j]
+                A[j] = A[i]
+                A[i] = temp
+    return A
+        
 '''
 PlayerPool = [createPlayer("Morphice"), createPlayer("boxxybabee"), createPlayer("Christi"),
               createPlayer("CocoCookieDough"), createPlayer("Dog WITH A Blog"), createPlayer("Gamer183"),
