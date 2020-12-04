@@ -246,6 +246,24 @@
             {% endif %}
             <!--End of Red Team Recommend Message Box-->
 
+            <!-- Start of Red Team Win Button -->
+            {% if ( (on_lobby_1 and red_team_1|length == 5 and blue_team_1|length == 5) or (on_lobby_2 and red_team_2|length == 5 and blue_team_2|length == 5) ) %}
+            <div class="row">
+                <div class="col-12 text-center">
+                        {% if on_lobby_1 %}
+                    <form method="get" action="/endgame/RED/lobby_1">
+                        {% endif %}
+                        {% if on_lobby_2 %}
+                    <form method="get" action="/endgame/RED/lobby_2">
+                        {% endif %}
+                        <button type="submit" class="btn btn-outline-light bg-danger inhouse-button-margins"><h5
+                                class="text-light">Red Win</h5></button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+            <!-- End of Red Team Win Button -->
+
         </div>
         <!--End of Red Team Column-->
 
@@ -463,6 +481,24 @@
             </div>
             {% endif %}
             <!-- End of Blue Team Recommend Message Box -->
+
+            <!-- Start of Blue Team Win Button -->
+            {% if ( (on_lobby_1 and red_team_1|length == 5 and blue_team_1|length == 5) or (on_lobby_2 and red_team_2|length == 5 and blue_team_2|length == 5) ) %}
+            <div class="row">
+                <div class="col-12 text-center">
+                        {% if on_lobby_1 %}
+                    <form method="get" action="/endgame/BLUE/lobby_1">
+                        {% endif %}
+                        {% if on_lobby_2 %}
+                    <form method="get" action="/endgame/BLUE/lobby_2">
+                        {% endif %}
+                        <button type="submit" class="btn btn-outline-light bg-primary inhouse-button-margins"><h5
+                                class="text-light">Blue Win</h5></button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+            <!-- End of Blue Team Win Button -->
 
         </div>
          <!-- End of Blue Team Column -->
