@@ -38,7 +38,7 @@
                     <th scope="col" class="text-center">Position</th>
                     <th scope="col">Tier</th>
                     <th scope="col">Summoner</th>
-                    <th scope="col">League Points</th>
+                    <th scope="col">Inhouse Points</th>
                 </tr>
              </thead>
              <tbody>
@@ -61,7 +61,7 @@
                 <th><img src="{{ url_for('static', filename=emblems[player['summonerName']]) }}" class="emblem_leaderboard"></th>
                 {% endif %}
                 <th>{{ player['summonerName'] }}</th>
-                <th>{{ player['leaguePoints'] }}</th>
+                <th>{{ inhouse_points[player['summonerName']] }}</th>
             </tr>
         {% endfor %}
         {% endif %}
