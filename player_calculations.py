@@ -474,14 +474,13 @@ def ClearTeam():
         Select(TeamB[0],TeamB)
         movetoTeam("P")
         
-def sort_players(A):
+def sort_players(A, inhouse_points):
 
     for i in range(len(A)):
         for j in range(len(A)):
-            p1 = A[i]
-            p2 = A[j]
-            lp1 = p1['leaguePoints']
-            lp2 = p2['leaguePoints']
+
+            lp1 = inhouse_points[A[i]['summonerName']]
+            lp2 = inhouse_points[A[j]['summonerName']]
 
             if lp1 > lp2:
                 temp = A[j]
