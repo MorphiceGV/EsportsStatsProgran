@@ -24,17 +24,30 @@ mysql = MySQL(app)
 
 account = ""
 
-
+'''
 queue = [createPlayer("Christi"), createPlayer("OrdinaryGuyRyu")]
 
 lobby_1 = [createPlayer("boxxybabee"), createPlayer("CocoCookieDough")]
 
-red_team_1 = [createPlayer("Morphice")]
+red_team_1 = [createPlayer("morphice")]
 blue_team_1 = [createPlayer("Dog WITH A Blog")]
 
-lobby_2 = [createPlayer("LT Pancakes")]
+lobby_2 = [createPlayer("Lt Pancakes")]
 red_team_2 = [createPlayer("Gamer183")]
-blue_team_2 = [ createPlayer("MorningBacon")]
+blue_team_2 = [createPlayer("MorningBacon")]
+'''
+
+queue = []
+
+lobby_1 = []
+red_team_1 = []
+blue_team_1 = []
+
+lobby_2 = []
+red_team_2 = []
+blue_team_2 = []
+
+inhouse_points = {}
 
 
 # Login for Regular Users
@@ -282,13 +295,28 @@ def join_queue(player):
             flash('Player already in Queue')
             return redirect(url_for('home'))
         if not player == "":
-            if len(queue) <= 10:
+            if len(queue) < 10:
                 p = createPlayer(player)
                 queue.append(p)
+                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute('SELECT * FROM inhouse_point_table WHERE summonerName = %s', (p['summonerName'],))
+                acc = cursor.fetchone()
+                if not acc:
+                    cursor.execute('INSERT INTO inhouse_point_table (summonerName, inhouse_points) VALUES (%s, %s)', (p['summonerName'], 0))
+                    inhouse_points[p['summonerName']] = 0
+                    mysql.connection.commit()
+                    cursor.close()
+                else:
+                    cursor.execute('SELECT * from inhouse_point_table where summonerName = %s', (p['summonerName'],))
+                    pl = cursor.fetchone()
+                    points = pl['inhouse_points']
+                    inhouse_points[p['summonerName']] = points
+                    mysql.connection.commit()
+                    cursor.close()
                 flash('Added to Queue successfully!')
                 return redirect(url_for('home'))
             else:
-                flash('Queue has reached capacity, please try again shortly.')
+                flash('Queue has reached capacity (10), please try again shortly.')
         else:
             flash('Invalid Player. Please input valid Summoner name on login page.')
     return redirect(url_for('login'))
@@ -634,7 +662,7 @@ def FullTB(lobby):
                     a = PlaceRecommend(red_team_2, blue_team_2, lobby_2)
                     lobby_2.remove(a)
                     red_team_2.append(a)
-                if len(red_team_2) == len(blue_team_2) and len(red_team_1) < 5:
+                if len(red_team_2) == len(blue_team_2) and len(red_team_2) < 5:
                     a = PlaceRecommend(blue_team_2, red_team_2, lobby_2)
                     lobby_2.remove(a)
                     blue_team_2.append(a)
@@ -648,6 +676,125 @@ def FullTB(lobby):
     return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
                            blue_team_1=blue_team_1, on_lobby_1=True)
 
+@app.route('/endgame/<winning_team>/<lobby>', methods=['GET', 'POST'])
+def endgame(winning_team, lobby):
+    global account
+    global lobby_1
+    global lobby_2
+    global red_team_1
+    global blue_team_1
+    global red_team_2
+    global blue_team_2
+    global inhouse_points
+
+    if 'loggedin' in session:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        if lobby == 'lobby_1':
+            if winning_team == 'RED':
+                for player in red_team_1:
+                    cursor.execute('SELECT * from inhouse_point_table where summonerName = %s', (player['summonerName'],))
+                    pl = cursor.fetchone()
+                    points = pl['inhouse_points']
+                    points += 3
+                    cursor.execute(
+                        'UPDATE inhouse_point_table SET inhouse_points = %s WHERE summonerName = %s',
+                        (points, player['summonerName']))
+                    inhouse_points[player['summonerName']] += 3
+                for player in blue_team_1:
+                    cursor.execute('SELECT * from inhouse_point_table where summonerName = %s', (player['summonerName'],))
+                    pl = cursor.fetchone()
+                    points = pl['inhouse_points']
+                    points -= 1
+                    cursor.execute(
+                        'UPDATE inhouse_point_table SET inhouse_points = %s WHERE summonerName = %s',
+                        (points, player['summonerName']))
+                    inhouse_points[player['summonerName']] -= 1
+                msg = "Red is the winning team for Inhouse Lobby 1. Inhouse points have been updated accordingly in Leaderboard"
+                mysql.connection.commit()
+                cursor.close()
+                return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
+                                       blue_team_1=blue_team_1, msg=msg, on_lobby_1=True)
+            elif winning_team == 'BLUE':
+                for player in blue_team_1:
+                    cursor.execute('SELECT * from inhouse_point_table where summonerName = %s', (player['summonerName'],))
+                    pl = cursor.fetchone()
+                    points = pl['inhouse_points']
+                    points += 3
+                    cursor.execute(
+                        'UPDATE inhouse_point_table SET inhouse_points = %s WHERE summonerName = %s',
+                        (points, player['summonerName']))
+                    inhouse_points[player['summonerName']] += 3
+                for player in red_team_1:
+                    cursor.execute('SELECT * from inhouse_point_table where summonerName = %s', (player['summonerName'],))
+                    pl = cursor.fetchone()
+                    points = pl['inhouse_points']
+                    points -= 1
+                    cursor.execute(
+                        'UPDATE inhouse_point_table SET inhouse_points = %s WHERE summonerName = %s',
+                        (points, player['summonerName']))
+                    inhouse_points[player['summonerName']] -= 1
+                msg = "Blue is the winning team for Inhouse Lobby 1. Inhouse points have been updated accordingly in Leaderboard"
+                mysql.connection.commit()
+                cursor.close()
+                return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
+                                       blue_team_1=blue_team_1, msg=msg, on_lobby_1=True)
+            return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
+                                   blue_team_1=blue_team_1, on_lobby_1=True)
+        elif lobby == 'lobby_2':
+            if winning_team == 'RED':
+                for player in red_team_2:
+                    cursor.execute('SELECT * from inhouse_point_table where summonerName = %s', (player['summonerName'],))
+                    pl = cursor.fetchone()
+                    points = pl['inhouse_points']
+                    points += 3
+                    cursor.execute(
+                        'UPDATE inhouse_point_table SET inhouse_points = %s WHERE summonerName = %s',
+                        (points, player['summonerName']))
+                    inhouse_points[player['summonerName']] += 3
+                for player in blue_team_2:
+                    cursor.execute('SELECT * from inhouse_point_table where summonerName = %s', (player['summonerName'],))
+                    pl = cursor.fetchone()
+                    points = pl['inhouse_points']
+                    points -= 1
+                    cursor.execute(
+                        'UPDATE inhouse_point_table SET inhouse_points = %s WHERE summonerName = %s',
+                        (points, player['summonerName']))
+                    inhouse_points[player['summonerName']] -= 1
+                msg = "Red is the winning team for Inhouse Lobby 2. Inhouse points have been updated accordingly in Leaderboard"
+                mysql.connection.commit()
+                cursor.close()
+                return render_template('inhousesetup.html', account=account, lobby_2=lobby_2, red_team_2=red_team_2,
+                                       blue_team_2=blue_team_2, msg=msg, on_lobby_2=True)
+            elif winning_team == 'BLUE':
+                for player in blue_team_2:
+                    cursor.execute('SELECT * from inhouse_point_table where summonerName = %s', (player['summonerName'],))
+                    pl = cursor.fetchone()
+                    points = pl['inhouse_points']
+                    points += 3
+                    cursor.execute(
+                        'UPDATE inhouse_point_table SET inhouse_points = %s WHERE summonerName = %s',
+                        (points, player['summonerName']))
+                    inhouse_points[player['summonerName']] += 3
+                for player in red_team_2:
+                    cursor.execute('SELECT * from inhouse_point_table where summonerName = %s', (player['summonerName'],))
+                    pl = cursor.fetchone()
+                    points = pl['inhouse_points']
+                    points -= 1
+                    cursor.execute(
+                        'UPDATE inhouse_point_table SET inhouse_points = %s WHERE summonerName = %s',
+                        (points, player['summonerName']))
+                    inhouse_points[player['summonerName']] -= 1
+                msg = "Blue is the winning team for Inhouse Lobby 2. Inhouse points have been updated accordingly in Leaderboard"
+                mysql.connection.commit()
+                cursor.close()
+                return render_template('inhousesetup.html', account=account, lobby_2=lobby_2, red_team_2=red_team_2,
+                                       blue_team_2=blue_team_2, msg=msg, on_lobby_2=True)
+            return render_template('inhousesetup.html', account=account, lobby_2=lobby_2, red_team_2=red_team_2,
+                                   blue_team_2=blue_team_2, on_lobby_2=True)
+        return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
+                               blue_team_1=blue_team_1, on_lobby_1=True)
+    return redirect(url_for('login'))
+
 @app.route('/leaderboard/<view>', methods=['GET', 'POST'])
 def leaderboard(view):
     global lobby_1
@@ -656,6 +803,7 @@ def leaderboard(view):
     global blue_team_1
     global red_team_2
     global blue_team_2
+    global inhouse_points
 
     all_players = []
 
@@ -674,7 +822,7 @@ def leaderboard(view):
     if len(blue_team_2) > 0:
         all_players.extend(blue_team_2)
 
-    all_players = sort_players(all_players)
+    all_players = sort_players(all_players, inhouse_points)
 
     emblems = {}
 
@@ -683,10 +831,11 @@ def leaderboard(view):
         emblems[player['summonerName']] = emblem
 
     if view == "user_view":
-        return render_template('leaderboard.html', all_players=all_players, view=view, emblems=emblems)
+        return render_template('leaderboard.html', all_players=all_players, view=view, emblems=emblems, inhouse_points=inhouse_points)
     elif view == "admin_view":
-        return render_template('leaderboard.html', all_players=all_players, view=view, emblems=emblems)
+        return render_template('leaderboard.html', all_players=all_players, view=view, emblems=emblems, inhouse_points=inhouse_points)
     return redirect(url_for('login'))
+
 
 if __name__ == '__main__':
     app.run()
