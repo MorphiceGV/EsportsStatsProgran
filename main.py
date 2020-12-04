@@ -648,6 +648,45 @@ def FullTB(lobby):
     return render_template('inhousesetup.html', account=account, lobby_1=lobby_1, red_team_1=red_team_1,
                            blue_team_1=blue_team_1, on_lobby_1=True)
 
+@app.route('/leaderboard/<view>', methods=['GET', 'POST'])
+def leaderboard(view):
+    global lobby_1
+    global lobby_2
+    global red_team_1
+    global blue_team_1
+    global red_team_2
+    global blue_team_2
+
+    all_players = []
+
+    if len(queue) > 0:
+        all_players.extend(queue)
+    if len(lobby_1) > 0:
+        all_players.extend(lobby_1)
+    if len(lobby_2) > 0:
+        all_players.extend(lobby_2)
+    if len(red_team_1) > 0:
+        all_players.extend(red_team_1)
+    if len(red_team_2) > 0:
+        all_players.extend(red_team_2)
+    if len(blue_team_1) > 0:
+        all_players.extend(blue_team_1)
+    if len(blue_team_2) > 0:
+        all_players.extend(blue_team_2)
+
+    all_players = sort_players(all_players)
+
+    emblems = {}
+
+    for player in all_players:
+        emblem = get_emblem_image(player['tier'])
+        emblems[player['summonerName']] = emblem
+
+    if view == "user_view":
+        return render_template('leaderboard.html', all_players=all_players, view=view, emblems=emblems)
+    elif view == "admin_view":
+        return render_template('leaderboard.html', all_players=all_players, view=view, emblems=emblems)
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run()
