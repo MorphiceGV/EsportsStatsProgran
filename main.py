@@ -3,7 +3,7 @@ from flask_mysqldb import MySQL
 from flask_mail import Mail, Message
 import MySQLdb.cursors, re, uuid, ast, string, random
 from player_calculations import *
-
+#Helped Eric Fix this code Raymond Madden
 app = Flask(__name__, static_folder="static")
 app.secret_key = "secret key"
 
