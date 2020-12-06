@@ -1,7 +1,7 @@
 import requests
 import simplejson as json
 import json
-
+#RaymondMadden wrote this program and uploaded by Eric.
 apikey = 'API KEY WILL NOT BE UPLOADED TO GITHUB'
 Selected = ["",False]
 TeamA = []
