@@ -1,11 +1,11 @@
 ### DEMO: https://youtube.com/watch?v=kIkWpbm34bc&feature=youtu.be
 
-# Stockton ESports Team Balancing Assistant
+# Stockton Esports Inhouse Balancing Program
 
-Stockton ESports Inhouse Balancing Program, a project for CSCI 4485 Software Engineering, Fall 2020.
+Project for CSCI 4485 Software Engineering, Fall 2020.
 
 #### Team Members:
-- Eric Einhaus
+- Eric Einhaus 
 - Erick Garcia-Vargas
 - Raymond Madden
 - Kayla Brawley
